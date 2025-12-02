@@ -29,7 +29,6 @@ interface Area {
   description: string;
 }
 
-// Modal chung – bo tròn đẹp, cao vừa phải, nội dung scroll nếu dài
 const Modal = ({
   isOpen,
   onClose,
@@ -63,7 +62,7 @@ const Modal = ({
           </button>
         </div>
 
-        {/* Body – scroll được khi dài */}
+ 
         <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
       </div>
     </div>

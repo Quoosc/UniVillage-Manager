@@ -4,7 +4,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-// --- Component phụ trợ ---
 const Modal = ({ isOpen, onClose, title, children }: any) => {
   if (!isOpen) return null;
   return (

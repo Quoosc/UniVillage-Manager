@@ -32,7 +32,7 @@ function NavItem({
           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
       }`}
     >
-      {/* Active Indicator Bar (Optional aesthetic touch) */}
+      {/* Active Indicator Bar */}
       {active && (
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-r-full" />
       )}

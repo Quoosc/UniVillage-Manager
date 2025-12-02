@@ -29,6 +29,47 @@ interface Area {
   description: string;
 }
 
+// Modal chung – bo tròn đẹp, cao vừa phải, nội dung scroll nếu dài
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-[28px] shadow-2xl w-full max-w-md max-h-[70vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/60">
+          <h3 className="font-bold text-lg text-gray-900">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Body – scroll được khi dài */}
+        <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
+      </div>
+    </div>
+  );
+};
+
 const iconOptions = [
   { name: "Utensils", icon: <Utensils />, color: "text-orange-600" },
   { name: "ShoppingBag", icon: <ShoppingBag />, color: "text-blue-600" },
@@ -117,45 +158,6 @@ const initialAreas: Area[] = [
   },
 ];
 
-// Modal chung – popup mới: căn giữa, max-h, nội dung scroll
-const Modal = ({
-  isOpen,
-  onClose,
-  title,
-  children,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-}) => {
-  if (!isOpen) return null;
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-2xl mx-4 max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* body scroll */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
-      </div>
-    </div>
-  );
-};
-
 export function MasterDataManagement() {
   const [activeTab, setActiveTab] = useState<"areas" | "categories">(
     "categories"
@@ -163,22 +165,18 @@ export function MasterDataManagement() {
   const [categories, setCategories] =
     useState<Category[]>(initialCategories);
   const [areas, setAreas] = useState<Area[]>(initialAreas);
-
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deletingItem, setDeletingItem] = useState<any>(null);
-
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     iconName: "Utensils",
   });
 
-  // ===== Helpers =====
-  const openCategoryModal = (item?: Category) => {
+  const handleOpenCategoryModal = (item?: Category) => {
     if (item) {
       setEditingItem(item);
       setFormData({
@@ -193,7 +191,7 @@ export function MasterDataManagement() {
     setIsCategoryModalOpen(true);
   };
 
-  const openAreaModal = (item?: Area) => {
+  const handleOpenAreaModal = (item?: Area) => {
     if (item) {
       setEditingItem(item);
       setFormData({
@@ -213,7 +211,7 @@ export function MasterDataManagement() {
     const iconInfo = iconOptions.find(
       (i) => i.name === formData.iconName
     )!;
-    const IconComp =
+    const IconComponent =
       iconMap[formData.iconName as keyof typeof iconMap];
 
     const newCategory: Category = {
@@ -223,7 +221,7 @@ export function MasterDataManagement() {
       name: formData.name,
       description: formData.description,
       icon: (
-        <IconComp
+        <IconComponent
           className={`w-5 h-5 ${iconInfo.color}`}
         />
       ),
@@ -237,6 +235,7 @@ export function MasterDataManagement() {
     } else {
       setCategories((prev) => [...prev, newCategory]);
     }
+
     setIsCategoryModalOpen(false);
     setEditingItem(null);
   };
@@ -279,7 +278,6 @@ export function MasterDataManagement() {
   const currentData =
     activeTab === "categories" ? categories : areas;
 
-  // ===== RENDER =====
   return (
     <div className="p-6 min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -296,8 +294,8 @@ export function MasterDataManagement() {
           <button
             onClick={() =>
               activeTab === "categories"
-                ? openCategoryModal()
-                : openAreaModal()
+                ? handleOpenCategoryModal()
+                : handleOpenAreaModal()
             }
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-sm"
           >
@@ -387,8 +385,8 @@ export function MasterDataManagement() {
                       <button
                         onClick={() =>
                           activeTab === "categories"
-                            ? openCategoryModal(item)
-                            : openAreaModal(item)
+                            ? handleOpenCategoryModal(item)
+                            : handleOpenAreaModal(item)
                         }
                         className="text-blue-600 hover:text-blue-800"
                         title="Chỉnh sửa"
@@ -414,7 +412,7 @@ export function MasterDataManagement() {
         </div>
       </div>
 
-      {/* ===== MODAL DANH MỤC ===== */}
+      {/* Modal Thêm/Sửa Danh mục */}
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={() => {
@@ -459,13 +457,13 @@ export function MasterDataManagement() {
             />
           </div>
 
-          {/* ICON GRID – 2 hàng, mỗi hàng tối đa 4 icon */}
+          {/* CHỌN ICON – nhỏ gọn, 2 hàng, bo góc ngoài */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Chọn icon
             </label>
-            <div className="rounded-3xl border border-gray-200 bg-gray-50/40">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
+            <div className="rounded-2xl border border-gray-200 bg-white/70 px-3 py-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {iconOptions.map((opt) => {
                   const isActive = formData.iconName === opt.name;
                   const displayName =
@@ -495,14 +493,14 @@ export function MasterDataManagement() {
                           iconName: opt.name,
                         })
                       }
-                      className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-3 py-4 text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-3 text-[11px] font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
                         isActive
-                          ? "border-blue-600 bg-white shadow-md"
+                          ? "border-blue-600 bg-white shadow-sm"
                           : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                       }`}
                     >
                       <div
-                        className={`p-3 rounded-2xl ${
+                        className={`p-2 rounded-xl ${
                           isActive ? "bg-blue-50" : "bg-gray-100"
                         } transition`}
                       >
@@ -512,7 +510,7 @@ export function MasterDataManagement() {
                           } transition-transform`}
                         >
                           {React.cloneElement(opt.icon, {
-                            className: "w-7 h-7",
+                            className: "w-5 h-5",
                           })}
                         </span>
                       </div>
@@ -532,10 +530,9 @@ export function MasterDataManagement() {
             </div>
           </div>
 
-          {/* Footer */}
+          {/* Nút hành động */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button
-              type="button"
               onClick={() => {
                 setIsCategoryModalOpen(false);
                 setEditingItem(null);
@@ -545,7 +542,6 @@ export function MasterDataManagement() {
               Hủy
             </button>
             <button
-              type="button"
               onClick={handleSaveCategory}
               disabled={!formData.name.trim()}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -557,7 +553,7 @@ export function MasterDataManagement() {
         </div>
       </Modal>
 
-      {/* ===== MODAL KHU VỰC ===== */}
+      {/* Modal Khu vực */}
       <Modal
         isOpen={isAreaModalOpen}
         onClose={() => setIsAreaModalOpen(false)}
@@ -613,7 +609,7 @@ export function MasterDataManagement() {
         </div>
       </Modal>
 
-      {/* ===== MODAL XÓA ===== */}
+      {/* Modal Xóa */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -627,8 +623,8 @@ export function MasterDataManagement() {
                 Bạn có chắc chắn muốn xóa?
               </p>
               <p className="text-sm text-red-700 mt-1">
-                {deletingItem && `"${deletingItem.name}"`} sẽ bị xóa vĩnh
-                viễn và không thể khôi phục.
+                {deletingItem && `"${deletingItem.name}"`} sẽ bị xóa
+                vĩnh viễn và không thể khôi phục.
               </p>
             </div>
           </div>

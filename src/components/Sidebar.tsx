@@ -87,7 +87,7 @@ export function Sidebar({
   ];
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
+    <aside className="w-72 bg-gradient-to-b from-sky-50 via-blue-50 to-indigo-50 border-r border-gray-200 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
       {/* 1. Header Section */}
       <div className="p-6 pb-4">
         <div className="flex items-center gap-3 px-2">

@@ -1,7 +1,7 @@
 import { Search, Bell, ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 
-// Component ImageWithFallback đơn giản để xử lý ảnh lỗi (nếu bạn chưa có file riêng)
+// Component ImageWithFallback đơn giản để xử lý ảnh lỗi 
 const Avatar = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
   const [error, setError] = useState(false);
   return (

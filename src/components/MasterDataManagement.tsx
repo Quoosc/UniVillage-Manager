@@ -19,14 +19,15 @@ interface Area {
 }
 
 const iconOptions = [
-  { name: 'Utensils', Icon: Utensils, color: 'text-orange-600' },
-  { name: 'ShoppingBag', Icon: ShoppingBag, color: 'text-blue-600' },
-  { name: 'Camera', Icon: Camera, color: 'text-pink-600' },
-  { name: 'MapPin', Icon: MapPin, color: 'text-green-600' },
-  { name: 'Coffee', Icon: Coffee, color: 'text-amber-700' },
-  { name: 'Dumbbell', Icon: Dumbbell, color: 'text-red-600' },
-  { name: 'Building2', Icon: Building2, color: 'text-purple-600' },
-] as const;
+  { name: 'Utensils',    icon: <Utensils className="w-5 h-5" />, color: 'text-orange-600' },
+  { name: 'ShoppingBag', icon: <ShoppingBag className="w-5 h-5" />, color: 'text-blue-600' },
+  { name: 'Camera',      icon: <Camera className="w-5 h-5" />, color: 'text-pink-600' },
+  { name: 'MapPin',      icon: <MapPin className="w-5 h-5" />, color: 'text-green-600' },
+  { name: 'Coffee',      icon: <Coffee className="w-5 h-5" />, color: 'text-amber-700' },
+  { name: 'Dumbbell',    icon: <Dumbbell className="w-5 h-5" />, color: 'text-red-600' },
+  { name: 'Building2',   icon: <Building2 className="w-5 h-5" />, color: 'text-purple-600' },
+];
+
 
 const iconMap = { Utensils, ShoppingBag, Camera, MapPin, Coffee, Dumbbell, Building2 } as const;
 
@@ -271,28 +272,44 @@ export function MasterDataManagement() {
       />
     </div>
 
-    {/* CHỌN ICON – Gọn và đồng bộ */}
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-3">Chọn icon</label>
-      <div className="grid grid-cols-4 gap-3">
-        {iconOptions.map((opt) => {
-          const Icon = opt.Icon;
-          const active = formData.iconName === opt.name;
-          return (
-            <button
-              key={opt.name}
-              onClick={() => setFormData({ ...formData, iconName: opt.name })}
-              className={`flex flex-col items-center justify-center gap-2 px-3 py-3 rounded-xl border transition-all min-h-[76px]
-                ${active ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500/20 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-            >
-              {/* Use explicit size to avoid any inherited text size overriding SVG */}
-              <Icon size={24} className={opt.color} />
-              <span className="text-[11px] leading-4 text-gray-700 font-medium truncate w-full text-center">{opt.name}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+ {/* CHỌN ICON – layout 4 cột như hình */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-3">
+    Chọn icon
+  </label>
+
+  {/* GRID 4 CỘT */}
+  <div className="grid grid-cols-4 gap-3">
+    {iconOptions.map((opt) => {
+      const isActive = formData.iconName === opt.name;
+
+      return (
+        <button
+          key={opt.name}
+          type="button"
+          onClick={() => setFormData({ ...formData, iconName: opt.name })}
+          className={`flex flex-col items-center justify-center gap-1.5
+                      px-3 py-3 rounded-xl border text-xs font-medium
+                      bg-white min-h-[80px] transition-all
+                      ${
+                        isActive
+                          ? "border-blue-500 ring-1 ring-blue-500/20 shadow-sm"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+        >
+          {/* icon màu */}
+          <span className={opt.color}>{opt.icon}</span>
+
+          {/* tên icon */}
+          <span className="text-[11px] leading-4 truncate w-full text-center">
+            {opt.name}
+          </span>
+        </button>
+      );
+    })}
+  </div>
+</div>
+
 
     {/* Nút Hủy + Thêm/Cập nhật */}
     <div className="flex justify-end gap-3 pt-4">

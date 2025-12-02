@@ -187,3 +187,35 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Custom scrollbar - chỉ hiện khi hover */
+.scrollbar-hide-default {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-hide-default::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-hide-default::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-hide-default::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.scrollbar-hide-default:hover {
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.scrollbar-hide-default:hover::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+.scrollbar-hide-default:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.7);
+}

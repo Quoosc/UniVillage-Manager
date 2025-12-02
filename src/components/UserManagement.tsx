@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-// ────────────────────────────── Component phụ trợ ──────────────────────────────
 const Avatar = ({
   src,
   alt,
@@ -71,7 +70,7 @@ const Modal = ({ isOpen, onClose, title, children }: any) => {
   );
 };
 
-// ────────────────────────────── Types & Mock Data ──────────────────────────────
+
 interface User {
   id: string;
   name: string;
@@ -204,7 +203,7 @@ const statusColors = {
   "Bị khóa": "bg-red-50 text-red-700 ring-red-600/20",
 };
 
-// ────────────────────────────── Component chính ──────────────────────────────
+
 export function UserManagement() {
   const [activeTab, setActiveTab] = useState<
     "all" | "requests"

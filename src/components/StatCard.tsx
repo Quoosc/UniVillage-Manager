@@ -6,7 +6,7 @@ interface StatCardProps {
   value: string;
   icon: React.ReactNode;
   trend: string;
-  trendUp?: boolean; // Cho phép undefined để xử lý trường hợp không tăng/giảm (neutral)
+  trendUp?: boolean; 
   color:
     | "blue"
     | "green"

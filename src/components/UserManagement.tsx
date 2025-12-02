@@ -15,10 +15,11 @@ import {
   MessageSquare,
   Check,
   XCircle,
+  Info,
 } from "lucide-react";
 import { useState } from "react";
 
-// --- Component phụ trợ ---
+// ────────────────────────────── Component phụ trợ ──────────────────────────────
 const Avatar = ({
   src,
   alt,
@@ -33,7 +34,9 @@ const Avatar = ({
     <img
       src={
         error
-          ? `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&background=random`
+          ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              alt,
+            )}&background=random`
           : src
       }
       alt={alt}
@@ -48,7 +51,7 @@ const Modal = ({ isOpen, onClose, title, children }: any) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -68,7 +71,7 @@ const Modal = ({ isOpen, onClose, title, children }: any) => {
   );
 };
 
-// --- Types & Data ---
+// ────────────────────────────── Types & Mock Data ──────────────────────────────
 interface User {
   id: string;
   name: string;
@@ -78,7 +81,7 @@ interface User {
   status: "Hoạt động" | "Bị khóa";
   joinDate: string;
   location: string;
-  isRequestingStoreOwner?: boolean; // Cờ đánh dấu đang yêu cầu nâng quyền
+  isRequestingStoreOwner?: boolean;
   stats: {
     posts: number;
     tours: number;
@@ -86,7 +89,6 @@ interface User {
   };
 }
 
-// Mock Data: Thêm trường isRequestingStoreOwner = true cho một số user
 const mockUsers: User[] = [
   {
     id: "#USER-001",
@@ -148,7 +150,7 @@ const mockUsers: User[] = [
     location: "Khu A",
     stats: { posts: 88, tours: 2, connections: 300 },
   },
-  // 3 User đang yêu cầu nâng quyền
+  // Yêu cầu nâng quyền
   {
     id: "#USER-006",
     name: "Đặng Quốc F",
@@ -191,10 +193,10 @@ const mockUsers: User[] = [
 ];
 
 const roleColors = {
-  "Người dùng": "bg-blue-50 text-blue-700 border-blue-100",
+  "Người dùng": "bg-blue-50 text-blue-700 border-blue-200",
   "Chủ cửa hàng":
-    "bg-purple-50 text-purple-700 border-purple-100",
-  Admin: "bg-gray-100 text-gray-700 border-gray-200",
+    "bg-purple-50 text-purple-700 border-purple-200",
+  Admin: "bg-gray-100 text-gray-700 border-gray-300",
 };
 
 const statusColors = {
@@ -202,6 +204,7 @@ const statusColors = {
   "Bị khóa": "bg-red-50 text-red-700 ring-red-600/20",
 };
 
+// ────────────────────────────── Component chính ──────────────────────────────
 export function UserManagement() {
   const [activeTab, setActiveTab] = useState<
     "all" | "requests"
@@ -210,8 +213,9 @@ export function UserManagement() {
     null,
   );
   const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState<User[]>(mockUsers);
 
-  // State cho Modal
+  // Modal states
   const [selectedUser, setSelectedUser] = useState<User | null>(
     null,
   );
@@ -219,13 +223,18 @@ export function UserManagement() {
     useState(false);
   const [isWarningModalOpen, setIsWarningModalOpen] =
     useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] =
+    useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] =
+    useState(false);
 
-  // State giả lập danh sách user (để demo chức năng xóa/duyệt)
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  // Tính số yêu cầu đang chờ
+  const pendingCount = users.filter(
+    (u) => u.isRequestingStoreOwner,
+  ).length;
 
-  // Logic lọc dữ liệu
+  // Lọc dữ liệu
   const filteredUsers = users.filter((user) => {
-    // Nếu tab là 'requests', chỉ lấy user có cờ isRequestingStoreOwner = true
     const matchesTab =
       activeTab === "all"
         ? true
@@ -240,9 +249,10 @@ export function UserManagement() {
     return matchesTab && matchesSearch;
   });
 
+  // Xử lý hành động từ menu
   const handleAction = (
     user: User,
-    action: "profile" | "warning" | "ban",
+    action: "profile" | "warning",
   ) => {
     setSelectedUser(user);
     setOpenMenuId(null);
@@ -250,38 +260,46 @@ export function UserManagement() {
     if (action === "warning") setIsWarningModalOpen(true);
   };
 
-  // Logic Duyệt yêu cầu
-  const handleApproveRequest = (user: User) => {
-    if (
-      confirm(
-        `Xác nhận nâng quyền "Chủ cửa hàng" cho ${user.name}?`,
-      )
-    ) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === user.id
-            ? {
-                ...u,
-                role: "Chủ cửa hàng",
-                isRequestingStoreOwner: undefined,
-              }
-            : u,
-        ),
-      );
-    }
+  // Mở modal duyệt / từ chối
+  const openApproveModal = (user: User) => {
+    setSelectedUser(user);
+    setIsApproveModalOpen(true);
+  };
+  const openRejectModal = (user: User) => {
+    setSelectedUser(user);
+    setIsRejectModalOpen(true);
   };
 
-  // Logic Từ chối yêu cầu
-  const handleRejectRequest = (user: User) => {
-    if (confirm(`Từ chối yêu cầu của ${user.name}?`)) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === user.id
-            ? { ...u, isRequestingStoreOwner: undefined }
-            : u,
-        ),
-      );
-    }
+  // Xác nhận duyệt
+  const handleConfirmApprove = () => {
+    if (!selectedUser) return;
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === selectedUser.id
+          ? {
+              ...u,
+              role: "Chủ cửa hàng" as const,
+              isRequestingStoreOwner: undefined,
+            }
+          : u,
+      ),
+    );
+    setIsApproveModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  // Xác nhận từ chối
+  const handleConfirmReject = () => {
+    if (!selectedUser) return;
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === selectedUser.id
+          ? { ...u, isRequestingStoreOwner: undefined }
+          : u,
+      ),
+    );
+    setIsRejectModalOpen(false);
+    setSelectedUser(null);
   };
 
   return (
@@ -290,7 +308,7 @@ export function UserManagement() {
       onClick={() => setOpenMenuId(null)}
     >
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
@@ -300,7 +318,6 @@ export function UserManagement() {
               Quản lý thành viên và quyền truy cập hệ thống
             </p>
           </div>
-
           <div className="flex items-center gap-3">
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
@@ -312,19 +329,19 @@ export function UserManagement() {
                 className="w-full md:w-80 pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors shadow-sm focus:ring-2 focus:ring-gray-100">
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors shadow-sm">
               <Filter className="w-4 h-4" />
-              <span>Lọc</span>
+              Lọc
             </button>
           </div>
         </div>
 
-        {/* Tabs Section */}
+        {/* Tabs */}
         <div className="border-b border-gray-200">
-          <div className="flex gap-6">
+          <div className="flex gap-8">
             <button
               onClick={() => setActiveTab("all")}
-              className={`pb-4 px-2 relative text-sm font-medium transition-all duration-200 ${
+              className={`pb-4 px-2 relative text-sm font-medium transition-all ${
                 activeTab === "all"
                   ? "text-blue-600"
                   : "text-gray-500 hover:text-gray-700"
@@ -332,29 +349,28 @@ export function UserManagement() {
             >
               Tất cả người dùng
               {activeTab === "all" && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full" />
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600" />
               )}
             </button>
+
             <button
               onClick={() => setActiveTab("requests")}
-              className={`pb-4 px-2 relative text-sm font-medium flex items-center gap-2 transition-all duration-200 ${
+              className={`pb-4 px-2 relative text-sm font-medium flex items-center gap-2 transition-all ${
                 activeTab === "requests"
                   ? "text-blue-600"
                   : "text-gray-600 hover:text-gray-800"
               }`}
             >
               Yêu cầu chủ cửa hàng
-              {/* Badge số thông báo */}
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-semibold transition-all duration-200 ${
+                className={`px-2 py-0.5 rounded-full text-xs font-semibold transition-all ${
                   activeTab === "requests"
-                    ? "bg-blue-100 text-blue-700" 
-                    : "bg-red-500 text-white" 
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-red-500 text-white"
                 }`}
               >
-                3
+                {pendingCount}
               </span>
-              {/* Đường gạch dưới khi active */}
               {activeTab === "requests" && (
                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600" />
               )}
@@ -362,7 +378,7 @@ export function UserManagement() {
           </div>
         </div>
 
-        {/* Data Table Card */}
+        {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -425,45 +441,62 @@ export function UserManagement() {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${statusColors[user.status]}`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${user.status === "Hoạt động" ? "bg-green-600" : "bg-red-600"}`}
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              user.status === "Hoạt động"
+                                ? "bg-green-600"
+                                : "bg-red-600"
+                            }`}
                           ></span>
                           {user.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right relative">
-                        {/* LOGIC HÀNH ĐỘNG: Nếu ở tab Requests thì hiện nút Duyệt/Từ chối, nếu ở tab All thì hiện Menu */}
                         {activeTab === "requests" ? (
                           <div className="flex justify-end gap-2">
+                            {/* Nút Duyệt */}
                             <button
                               onClick={() =>
-                                handleApproveRequest(user)
+                                openApproveModal(user)
                               }
-                              title="Duyệt yêu cầu"
-                              className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors border border-green-200"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg border border-green-200 shadow-sm transition-all"
                             >
-                              <Check size={18} />
+                              <Check
+                                size={16}
+                                strokeWidth={2.5}
+                              />
+                              <span className="text-xs font-bold">
+                                Duyệt
+                              </span>
                             </button>
+
+                            {/* Nút Từ chối */}
                             <button
                               onClick={() =>
-                                handleRejectRequest(user)
+                                openRejectModal(user)
                               }
-                              title="Từ chối yêu cầu"
-                              className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 shadow-sm transition-all"
                             >
-                              <X size={18} />
+                              <XCircle
+                                size={16}
+                                strokeWidth={2.5}
+                              />
+                              <span className="text-xs font-bold">
+                                Từ chối
+                              </span>
                             </button>
+
+                            {/* Xem hồ sơ */}
                             <button
                               onClick={() =>
                                 handleAction(user, "profile")
                               }
-                              title="Xem chi tiết"
-                              className="p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                              className="p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all"
                             >
                               <Eye size={18} />
                             </button>
                           </div>
                         ) : (
-                          <>
+                          <div className="inline-block text-left">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -473,14 +506,14 @@ export function UserManagement() {
                                     : user.id,
                                 );
                               }}
-                              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none"
+                              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
                               <MoreVertical className="w-4 h-4" />
                             </button>
 
-                            {/* Dropdown Menu */}
+                            {/* Dropdown hiện đúng dưới nút 3 chấm */}
                             {openMenuId === user.id && (
-                              <div className="absolute right-8 top-10 w-48 bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 z-10 py-1 animation-scale-in">
+                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 py-1">
                                 <button
                                   onClick={() =>
                                     handleAction(
@@ -488,9 +521,9 @@ export function UserManagement() {
                                       "profile",
                                     )
                                   }
-                                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 group/item"
+                                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                 >
-                                  <Eye className="w-4 h-4 text-gray-400 group-hover/item:text-blue-600" />
+                                  <Eye className="w-4 h-4" />{" "}
                                   Xem hồ sơ
                                 </button>
                                 <button
@@ -500,25 +533,25 @@ export function UserManagement() {
                                       "warning",
                                     )
                                   }
-                                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 group/item"
+                                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                 >
-                                  <ShieldAlert className="w-4 h-4 text-gray-400 group-hover/item:text-orange-600" />
+                                  <ShieldAlert className="w-4 h-4" />{" "}
                                   Gửi cảnh báo
                                 </button>
                                 {user.status === "Hoạt động" ? (
                                   <button className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                    <Ban className="w-4 h-4" />
+                                    <Ban className="w-4 h-4" />{" "}
                                     Khóa tài khoản
                                   </button>
                                 ) : (
                                   <button className="w-full text-left px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4" />
+                                    <CheckCircle className="w-4 h-4" />{" "}
                                     Mở khóa
                                   </button>
                                 )}
                               </div>
                             )}
-                          </>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -537,7 +570,7 @@ export function UserManagement() {
             </table>
           </div>
 
-          {/* Pagination */}
+          {/* Pagination (giữ nguyên) */}
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50/30 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-500">
               Hiển thị{" "}
@@ -567,7 +600,87 @@ export function UserManagement() {
           </div>
         </div>
 
-        {/* --- MODAL: XEM HỒ SƠ --- */}
+        {/* ──────── Modal Duyệt Yêu Cầu ──────── */}
+        <Modal
+          isOpen={isApproveModalOpen}
+          onClose={() => setIsApproveModalOpen(false)}
+          title="Duyệt yêu cầu chủ cửa hàng"
+        >
+          <div className="space-y-5">
+            <div className="bg-green-50 p-4 rounded-xl border border-green-200 flex gap-3">
+              <Info className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-green-900">
+                  Bạn đang duyệt yêu cầu của:
+                </p>
+                <p className="text-base font-bold text-green-900 mt-1">
+                  {selectedUser?.name}
+                </p>
+                <p className="text-xs text-green-700 mt-1">
+                  Sau khi duyệt, người dùng sẽ được nâng quyền
+                  thành <strong>Chủ cửa hàng</strong>
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsApproveModalOpen(false)}
+                className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleConfirmApprove}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-sm"
+              >
+                <Check size={16} strokeWidth={2.5} /> Xác nhận
+                duyệt
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* ──────── Modal Từ Chối Yêu Cầu ──────── */}
+        <Modal
+          isOpen={isRejectModalOpen}
+          onClose={() => setIsRejectModalOpen(false)}
+          title="Từ chối yêu cầu chủ cửa hàng"
+        >
+          <div className="space-y-5">
+            <div className="bg-red-50 p-4 rounded-xl border border-red-200 flex gap-3">
+              <Info className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-900">
+                  Bạn đang từ chối yêu cầu của:
+                </p>
+                <p className="text-base font-bold text-red-900 mt-1">
+                  {selectedUser?.name}
+                </p>
+                <p className="text-xs text-red-700 mt-1">
+                  Yêu cầu sẽ bị xóa và người dùng sẽ nhận thông
+                  báo.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsRejectModalOpen(false)}
+                className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 shadow-sm"
+              >
+                <XCircle size={16} strokeWidth={2.5} /> Xác nhận
+                từ chối
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* ──────── Modal Xem Hồ Sơ ──────── */}
         <Modal
           isOpen={isProfileModalOpen}
           onClose={() => setIsProfileModalOpen(false)}
@@ -575,7 +688,6 @@ export function UserManagement() {
         >
           {selectedUser && (
             <div className="space-y-6">
-              {/* Header Info */}
               <div className="flex items-start gap-4 pb-6 border-b border-gray-100">
                 <Avatar
                   src={selectedUser.avatar}
@@ -599,7 +711,11 @@ export function UserManagement() {
                       className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${statusColors[selectedUser.status]}`}
                     >
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${selectedUser.status === "Hoạt động" ? "bg-green-600" : "bg-red-600"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          selectedUser.status === "Hoạt động"
+                            ? "bg-green-600"
+                            : "bg-red-600"
+                        }`}
                       ></span>
                       {selectedUser.status}
                     </span>
@@ -607,7 +723,6 @@ export function UserManagement() {
                 </div>
               </div>
 
-              {/* Details Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
@@ -627,7 +742,6 @@ export function UserManagement() {
                 </div>
               </div>
 
-              {/* Stats */}
               <div>
                 <h5 className="text-sm font-semibold text-gray-900 mb-3">
                   Thống kê hoạt động
@@ -663,7 +777,6 @@ export function UserManagement() {
                 </div>
               </div>
 
-              {/* Footer Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   onClick={() => setIsProfileModalOpen(false)}
@@ -679,7 +792,7 @@ export function UserManagement() {
           )}
         </Modal>
 
-        {/* --- MODAL: GỬI CẢNH BÁO --- */}
+        {/* ──────── Modal Gửi Cảnh Báo ──────── */}
         <Modal
           isOpen={isWarningModalOpen}
           onClose={() => setIsWarningModalOpen(false)}
@@ -699,7 +812,6 @@ export function UserManagement() {
                   </p>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Loại vi phạm
@@ -714,7 +826,6 @@ export function UserManagement() {
                   <option>Khác</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Nội dung chi tiết
@@ -725,7 +836,6 @@ export function UserManagement() {
                   placeholder="Nhập nội dung cảnh báo chi tiết..."
                 ></textarea>
               </div>
-
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   onClick={() => setIsWarningModalOpen(false)}

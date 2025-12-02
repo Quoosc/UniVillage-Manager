@@ -49,7 +49,7 @@ const mockReports: Report[] = [
         "Bài viết chứa nhiều liên kết quảng cáo không liên quan đến nội dung chính",
       reportedContent:
         "Khám phá Đà Lạt tuyệt vời! 🌸 Click vào link để nhận ưu đãi khủng!!! 🎉🎉🎉 www.example.com/promo... Đừng bỏ lỡ cơ hội này!!! Giảm giá 90% chỉ hôm nay!!!",
-      targetUser: "Trần Thị Bảo",
+      targetUser: "Trần Minh Quang",
     },
   },
   {
@@ -71,7 +71,7 @@ const mockReports: Report[] = [
         "Bình luận có lời lẽ xúc phạm và công kích cá nhân người dùng khác",
       reportedContent:
         "Bình luận này chứa nội dung xúc phạm nghiêm trọng đến danh dự và nhân phẩm của người khác. Sử dụng ngôn từ không phù hợp với cộng đồng.",
-      targetUser: "Phạm Văn Cường",
+      targetUser: "Hồ Ngọc Quỳnh",
     },
   },
   {
@@ -93,7 +93,7 @@ const mockReports: Report[] = [
         "Tài khoản này giả mạo là quản trị viên hệ thống và yêu cầu thông tin cá nhân nhạy cảm",
       reportedContent:
         "Tài khoản đã gửi tin nhắn giả mạo yêu cầu người dùng cung cấp mật khẩu, thông tin đăng nhập và dữ liệu ngân hàng. Đây là hành vi lừa đảo nghiêm trọng.",
-      targetUser: "fake_admin_2025",
+      targetUser: "Võ Sĩ Trí Thông",
     },
   },
   {
@@ -299,11 +299,24 @@ const targetIcons = {
   "Địa điểm": <MapPin className="h-5 w-5" />,
 };
 
+// Violation pill palettes (bg + text + border + ring)
 const violationColors: Record<string, string> = {
-  Spam: "bg-orange-50 text-orange-700 border-orange-200",
-  "Ngôn từ đả kích": "bg-red-50 text-red-700 border-red-200",
-  "Lừa đảo": "bg-purple-50 text-purple-700 border-purple-200",
-  "Thông tin sai lệch": "bg-blue-50 text-blue-700 border-blue-200",
+  Spam: "bg-orange-100 text-orange-700 border-orange-200 ring-orange-600/20",
+  "Ngôn từ đả kích": "bg-red-100 text-red-700 border-red-200 ring-red-600/20",
+  "Lừa đảo": "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200 ring-fuchsia-600/20",
+  "Thông tin sai lệch": "bg-blue-100 text-blue-700 border-blue-200 ring-blue-600/20",
+};
+
+// Row background tint by status
+const rowBgByStatus: Record<Report['status'], string> = {
+  "Chờ xử lý": "hover:bg-amber-50/50",
+  "Đã xử lý": "hover:bg-emerald-50/50",
+};
+
+// Status pill palettes (bg must be green for “Đã xử lý”)
+const statusColors: Record<Report['status'], string> = {
+  "Chờ xử lý": "bg-amber-100 text-amber-700 border-amber-200 ring-amber-600/20",
+  "Đã xử lý": "bg-emerald-100 text-emerald-700 border-emerald-200 ring-emerald-600/20",
 };
 
 export function ReportsManagement() {
@@ -388,6 +401,7 @@ export function ReportsManagement() {
               <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
                 {filteredReports.map((report) => {
                   const isActive = selectedReport?.id === report.id;
+                  const rowTint = rowBgByStatus[report.status];
                   return (
                     <div
                       key={report.id}
@@ -396,7 +410,7 @@ export function ReportsManagement() {
                         "cursor-pointer border-b border-gray-100 px-6 py-4 transition-colors",
                         isActive
                           ? "bg-blue-50/80 pl-[22px] border-l-4 border-l-blue-600"
-                          : "hover:bg-blue-50/40",
+                          : rowTint,
                       ].join(" ")}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -434,20 +448,20 @@ export function ReportsManagement() {
                               </div>
                             </div>
 
+                            {/* Violation pill with background */}
                             <span
-                              className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-medium ${
+                              className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ring-1 ring-inset ${
                                 violationColors[report.violation] ??
-                                "bg-gray-50 text-gray-700 border-gray-200"
+                                "bg-gray-100 text-gray-700 border-gray-200 ring-gray-600/20"
                               }`}
                             >
                               {report.violation}
                             </span>
 
+                            {/* Status pill with background; “Đã xử lý” is green */}
                             <span
-                              className={`ml-auto inline-flex items-center rounded-full px-3 py-1 text-[11px] font-medium ${
-                                report.status === "Chờ xử lý"
-                                  ? "bg-orange-50 text-orange-700"
-                                  : "bg-emerald-50 text-emerald-700"
+                              className={`ml-auto inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold border ring-1 ring-inset ${
+                                statusColors[report.status]
                               }`}
                             >
                               {report.status}
@@ -499,8 +513,8 @@ export function ReportsManagement() {
                         <span
                           className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-medium ${
                             selectedReport.status === "Chờ xử lý"
-                              ? "bg-orange-50 text-orange-700"
-                              : "bg-emerald-50 text-emerald-700"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-emerald-100 text-emerald-700"
                           }`}
                         >
                           {selectedReport.status}

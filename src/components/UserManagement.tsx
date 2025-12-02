@@ -91,10 +91,10 @@ interface User {
 const mockUsers: User[] = [
   {
     id: "#USER-001",
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@university.edu.vn",
+    name: "Phạm Trấn Quốc",
+    email: "23521309@university.edu.vn",
     avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+      "https://photo.znews.vn/w660/Uploaded/xbhunku/2017_07_03/16.jpg",
     role: "Người dùng",
     status: "Hoạt động",
     joinDate: "01/01/2024",
@@ -103,8 +103,8 @@ const mockUsers: User[] = [
   },
   {
     id: "#USER-002",
-    name: "Trần Thị B",
-    email: "tranthib@university.edu.vn",
+    name: "Trần Minh Quang",
+    email: "quang@university.edu.vn",
     avatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
     role: "Chủ cửa hàng",
@@ -115,8 +115,8 @@ const mockUsers: User[] = [
   },
   {
     id: "#USER-003",
-    name: "Lê Hoàng C",
-    email: "lehoangc@university.edu.vn",
+    name: "Hồ Ngọc Quỳnh",
+    email: "quynh@university.edu.vn",
     avatar:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
     role: "Admin",

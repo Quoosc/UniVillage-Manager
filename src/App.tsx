@@ -5,7 +5,7 @@ import { UserManagement } from "./components/UserManagement";
 import { PlaceManagement } from "./components/PlaceManagement";
 import { ReportsManagement } from "./components/ReportsManagement";
 import { SystemSettings } from "./components/SystemSettings";
-import { MasterDataManagement } from "./components/MasterDataManagement"; // 1. Import component mới
+import { MasterDataManagement } from "./components/MasterDataManagement"; 
 import {
   Users,
   MapPin,
